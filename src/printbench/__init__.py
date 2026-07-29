@@ -4,10 +4,11 @@ PrintBench
 A framework for generating and analyzing print characterization targets.
 """
 
-from .geometry import Point
+from .geometry import Point, Vector
 
 __version__ = "0.1.0"
 
 __all__ = [
     "Point",
+    "Vector",
 ]

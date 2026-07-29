@@ -1,21 +1,38 @@
 # PrintBench
 
-PrintBench is an open-source framework for generating and analyzing precision print characterization targets.
+PrintBench is an open-source Python library for generating precision print characterization targets.
 
-## Vision
+The project is intended to support UV, inkjet, laser, and other digital printing systems by providing reproducible test patterns for evaluating:
 
-PrintBench provides a vendor-neutral platform for:
+- Registration accuracy
+- Nozzle performance
+- Line quality
+- Resolution
+- Dot gain
+- Halftoning
+- Geometric accuracy
 
-- Generating precision print test targets
-- Supporting multiple output formats (SVG, PNG, ...)
-- Characterizing print quality
-- Measuring printer performance
-- Automating print analysis
+PrintBench is designed as a reusable geometry and drawing library first, with printer-specific target generation built on top of it.
 
 ## Project Status
 
 🚧 Early development
 
-## License
+The current focus is building the core geometry library that will support all future drawing operations.
 
-MIT
+## Development
+
+The project uses:
+
+- Python 3.14
+- Black
+- Ruff
+- Pytest
+
+Typical workflow:
+
+```bash
+python -m black .
+python -m ruff check .
+python -m pytest
+```
