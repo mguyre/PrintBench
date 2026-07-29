@@ -39,3 +39,20 @@ def test_vector_scalar_division():
     result = vector / 2
 
     assert result == Vector(4, 3)
+
+
+def test_length():
+    assert Vector(3, 4).length() == 5.0
+
+
+def test_length_squared():
+    assert Vector(3, 4).length_squared() == 25.0
+
+
+def test_zero_length():
+    assert Vector(0, 0).length() == 0.0
+    assert Vector(0, 0).length_squared() == 0.0
+
+
+def test_negative_components():
+    assert Vector(-3, -4).length() == 5.0

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 
@@ -65,6 +66,13 @@ class Vector:
     # ----------------------------------------------------------------------
     # Geometric Operations
     # ----------------------------------------------------------------------
+    def length(self) -> float:
+        """Return the Euclidean length of the vector."""
+        return math.hypot(self.x, self.y)
+
+    def length_squared(self) -> float:
+        """Return the squared Euclidean length of the vector."""
+        return self.x * self.x + self.y * self.y
 
     # ----------------------------------------------------------------------
     # Utility Methods
