@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Framework for generating and analyzing print characterization targets."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
     { name = "Mike Guyre" }
 ]
@@ -35,9 +35,13 @@ dev = [
 
 [tool.black]
 line-length = 88
+target-version = ["py314"]
 
 [tool.ruff]
 line-length = 88
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/printbench"]
