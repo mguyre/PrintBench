@@ -8,6 +8,8 @@ from dataclasses import dataclass
 class Vector:
     """Represents a displacement in 2D space."""
 
+    # the starting point is implied a (0,0)
+
     x: float
     y: float
 
@@ -89,3 +91,7 @@ class Vector:
             self.x / length,
             self.y / length,
         )
+
+    def dot(self, other: Vector) -> float:
+        """a · b == b · a"""
+        return self.x * other.x + self.y * other.y

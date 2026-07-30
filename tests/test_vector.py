@@ -109,3 +109,22 @@ def test_normalized_vector_has_unit_length():
 def test_normalizing_zero_vector_raises_value_error():
     with pytest.raises(ValueError):
         Vector(0, 0).normalized()
+
+
+def test_dot_product():
+    assert Vector(1, 2).dot(Vector(3, 4)) == 11
+
+
+def test_dot_product_with_zero_vector():
+    assert Vector(3, 4).dot(Vector(0, 0)) == 0
+
+
+def test_dot_product_is_commutative():
+    a = Vector(2, 5)
+    b = Vector(7, 11)
+
+    assert a.dot(b) == b.dot(a)
+
+
+def test_perpendicular_vectors_have_zero_dot_product():
+    assert Vector(1, 0).dot(Vector(0, 1)) == 0
