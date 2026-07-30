@@ -77,3 +77,15 @@ class Vector:
     # ----------------------------------------------------------------------
     # Utility Methods
     # ----------------------------------------------------------------------
+    def normalized(self) -> Vector:
+        """Return a unit vector with the same direction."""
+
+        length = self.length()
+
+        if length == 0:
+            raise ValueError("Cannot normalize a zero-length vector.")
+
+        return Vector(
+            self.x / length,
+            self.y / length,
+        )

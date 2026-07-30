@@ -1,3 +1,5 @@
+import pytest
+
 from printbench import Vector
 
 
@@ -56,3 +58,54 @@ def test_zero_length():
 
 def test_negative_components():
     assert Vector(-3, -4).length() == 5.0
+
+
+def test_length_squared_of_zero_vector_is_zero():
+    v = Vector(0, 0)
+
+    assert v.length_squared() == 0
+
+
+def test_length_squared_of_345_vector_is_25():
+    v = Vector(3, 4)
+
+    result = v.length_squared()
+
+    assert result == 25
+
+
+def test_length_of_zero_vector_is_zero():
+    v = Vector(0, 0)
+
+    result = v.length()
+
+    assert result == 0
+
+
+def test_length_is_independent_of_sign():
+    v = Vector(-3, -4)
+
+    result = v.length()
+
+    assert result == 5
+
+
+def test_normalized_345_vector():
+    v = Vector(3, 4)
+
+    result = v.normalized()
+
+    assert result == Vector(0.6, 0.8)
+
+
+def test_normalized_vector_has_unit_length():
+    v = Vector(3, 4)
+
+    result = v.normalized()
+
+    assert result.length() == pytest.approx(1.0)
+
+
+def test_normalizing_zero_vector_raises_value_error():
+    with pytest.raises(ValueError):
+        Vector(0, 0).normalized()
