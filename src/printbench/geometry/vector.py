@@ -27,7 +27,7 @@ class Vector:
             self.y + other.y,
         )
 
-    def __sub__(self, other: Vector) -> Vector:
+    def __sub__(self, other: object) -> Vector:
         """Return the difference between two vectors."""
 
         if not isinstance(other, Vector):
@@ -38,7 +38,7 @@ class Vector:
             self.y - other.y,
         )
 
-    def __mul__(self, scalar: float) -> Vector:
+    def __mul__(self, scalar: object) -> Vector:
         """Scale a vector."""
 
         if not isinstance(scalar, (int, float)):
@@ -54,7 +54,7 @@ class Vector:
 
         return self * scalar
 
-    def __truediv__(self, scalar: float) -> Vector:
+    def __truediv__(self, scalar: object) -> Vector:
         """Divide a vector by a scalar."""
 
         if not isinstance(scalar, (int, float)):
