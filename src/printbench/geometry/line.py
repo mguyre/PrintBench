@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from printbench.style import Style
+
 from .point import Point
 from .vector import Vector
 
@@ -19,6 +21,7 @@ from .vector import Vector
 class Line:
     start: Point
     end: Point
+    style: Style | None = None
 
     def vector(self) -> Vector:
         """Return the displacement from start to end."""

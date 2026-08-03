@@ -22,6 +22,7 @@
 - Tests are executable specifications.
 - Parameterize tests when many inputs verify the same behavior.
 - Test names should describe the behavior being verified.
+- Choose test data that makes implementation mistakes obvious. Avoid symmetric or repetitive values when they can hide bugs.
 
 ## Success Criteria
 
