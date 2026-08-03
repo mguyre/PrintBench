@@ -1,5 +1,13 @@
 # PrintBench Design Notes
 
+## Design Principles
+
+- Prefer composition over duplication.
+- Write code at the highest level of abstraction that correctly expresses the intent.
+- Behavior belongs to the object that owns the data.
+- Refactor only after the code demonstrates the need.
+- Introduce complexity only when it solves a real problem.## Goals
+
 ## Goals
 
 - Readability is more important than cleverness.
@@ -11,8 +19,13 @@
 
 - TDD: Red → Green → Refactor.
 - One behavior per test.
+- Tests are executable specifications.
 - Parameterize tests when many inputs verify the same behavior.
 - Test names should describe the behavior being verified.
+
+## Success Criteria
+
+- A new developer should be able to understand the designby reading the public APIs before reading the implementations.
 
 ## Geometry
 
@@ -26,3 +39,4 @@
 ## Comments
 
 Comments explain *why*, not *what*.
+

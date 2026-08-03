@@ -11,11 +11,15 @@ class Line:
     start: Point
     end: Point
 
+    def vector(self) -> Vector:
+        """Return the displacement from start to end."""
+        return self.end - self.start
+
     def length(self) -> float:
-        return self.start.distance_to(self.end)
+        return self.vector().length()
 
     def direction(self) -> Vector:
-        return (self.end - self.start).normalized()
+        return self.vector().normalized()
 
     def midpoint(self) -> Point:
-        return self.start + (self.end - self.start) / 2
+        return self.start + self.vector() / 2
