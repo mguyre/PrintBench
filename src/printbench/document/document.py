@@ -19,10 +19,17 @@ Those responsibilities belong to renderers.
 """
 
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 
 @dataclass(slots=True)
 class Document:
+    """A collection of geometry within a Cartesian frame.
+
+    All dimensions and coordinates are expressed in millimeters.
+    """
+
+    units: ClassVar[str] = "mm"
     width: float
     height: float
 

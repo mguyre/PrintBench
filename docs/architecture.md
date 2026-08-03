@@ -56,4 +56,6 @@ Examples:
 
 A renderer is responsible for coordinate conversion.
 
+Coordinate transformation and clipping are separate responsibilities.
+
 **Geometry is never modified to satisfy an output format.**
