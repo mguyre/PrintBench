@@ -1,3 +1,16 @@
+"""
+Point geometry.
+
+Represents a location in Cartesian space.
+
+A Point is a location, not a displacement.
+
+Point arithmetic follows standard geometric rules:
+- Point - Point -> Vector
+- Point + Vector -> Point
+- Point - Vector -> Point
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

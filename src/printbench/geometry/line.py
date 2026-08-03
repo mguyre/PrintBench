@@ -1,3 +1,12 @@
+"""
+Line geometry.
+
+Represents a directed line segment between two Points.
+
+A Line derives its behavior from the relationship between
+its endpoints rather than duplicating geometric calculations.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
