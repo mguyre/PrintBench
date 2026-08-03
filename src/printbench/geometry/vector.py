@@ -1,3 +1,11 @@
+"""
+Vector geometry.
+
+Represents a displacement in Cartesian space.
+
+A Vector has magnitude and direction but no fixed location.
+"""
+
 from __future__ import annotations
 
 import math
