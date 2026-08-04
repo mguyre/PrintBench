@@ -8,6 +8,8 @@ The code should describe the problem domain rather than the implementation detai
 
 When multiple designs are possible, choose the one that most clearly expresses intent.
 
+PrintBench is not intended to be a general-purpose CAD system. It provides a focused set of geometry, layout, and rendering capabilities for creating precise 2D manufacturing and characterization documents.
+
 ## Geometry
 
 Geometry is independent of any output format.
