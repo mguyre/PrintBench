@@ -18,8 +18,11 @@ A Document does NOT:
 Those responsibilities belong to renderers.
 """
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import ClassVar
+
+from printbench.style import Style
 
 
 @dataclass(slots=True)
@@ -32,6 +35,7 @@ class Document:
     units: ClassVar[str] = "mm"
     width: float
     height: float
+    default_style: Style = field(default_factory=Style)
 
     _elements: list = field(default_factory=list)
 
@@ -48,5 +52,5 @@ class Document:
     def __len__(self) -> int:
         return len(self._elements)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         return iter(self._elements)

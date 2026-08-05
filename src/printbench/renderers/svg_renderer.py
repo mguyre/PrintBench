@@ -1,41 +1,76 @@
 from dataclasses import dataclass
 
+import svgwrite
+
 from printbench import Document, Line, Point
+from printbench.style import Style
 
 
 @dataclass(slots=True)
 class SvgRenderer:
 
+    _document: Document | None = None
+    _document_height: float = 0.0  # Set by _initialize() before rendering.
+    _default_style: Style | None = None
+    _drawing: svgwrite.Drawing | None = None
+
     def render(self, document: Document) -> str:
-        svg_header = (
-            '<svg xmlns="http://www.w3.org/2000/svg" '
-            f'width="{document.width}{document.units}" '
-            f'height="{document.height}{document.units}" '
-            f'viewBox="0 0 {document.width} {document.height}"'
-            ">"
+        self._initialize(document)
+
+        for element in document:
+            self._render(element)
+
+        return self._drawing.tostring()
+
+    def _initialize(self, document: Document) -> None:
+        if document.default_style is None:
+            raise ValueError("Document.default_style cannot be None")
+        self._document = document
+        self._document_height = document.height
+        self._default_style = document.default_style
+        self._drawing = svgwrite.Drawing(
+            size=(
+                f"{document.width}{document.units}",
+                f"{document.height}{document.units}",
+            ),
+            profile="tiny",
         )
+        self._drawing.viewbox(
+            minx=0,
+            miny=0,
+            width=document.width,
+            height=document.height,
+        )
+        # TODO:
+        # Resolve document.default_style into a renderer-specific complete style.
 
-        svg_footer = "</svg>"
-
-        return f"{svg_header}{svg_footer}"
-
-    def _map_point(self, point: Point, document: Document) -> Point:
+    def _map_point(self, point: Point) -> Point:
         """Map a document point (Cartesian) into SVG coordinates."""
         # Cartesian is bottom left origin
         # SVG is top left origin
         return Point(
             point.x,
-            document.height - point.y,
+            self._document_height - point.y,
         )
 
-    def _render_line(self, line: Line, document: Document) -> str:
-        start = self._map_point(line.start, document)
-        end = self._map_point(line.end, document)
+    def _render(self, element) -> None:
+        if isinstance(element, Line):
+            self._render_line(element)
+        else:
+            raise TypeError(f"Unsupported element type: {type(element).__name__}")
+
+    def _render_line(self, line: Line) -> str:
+        start = self._map_point(line.start)
+        end = self._map_point(line.end)
+        style = line.style or self._default_style
 
         return (
             f"<line "
             f'x1="{start.x}" '
             f'y1="{start.y}" '
             f'x2="{end.x}" '
-            f'y2="{end.y}" />'
+            f'y2="{end.y}" '
+            f'stroke="{style.stroke_color}" '
+            f'stroke_width="{style.stroke_width}" '
+            "/>"
         )
