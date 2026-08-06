@@ -1,4 +1,4 @@
-from printbench import Document, Point, SvgRenderer
+from printbench import Document, Line, Point, SvgRenderer
 from printbench.style import StrokeStyle, Style
 
 
@@ -163,3 +163,119 @@ def test_effective_style_overrides_all_values():
     result = renderer._effective_style(override)
 
     assert result == override
+
+
+def test_render_line():
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Line(
+            start=Point(12.3, 45.6),
+            end=Point(78.9, 101.2),
+        )
+    )
+
+    renderer = SvgRenderer()
+
+    svg = renderer.render(doc)
+    line_start = svg.index("<line")
+    line_end = svg.index("/>", line_start) + len("/>")
+
+    encoded_line = svg[line_start:line_end]
+
+    assert encoded_line.startswith("<line")
+    assert encoded_line.endswith("/>")
+
+    assert 'x1="12.3"' in encoded_line
+    assert 'y1="522.2"' in encoded_line
+
+    assert 'x2="78.9"' in encoded_line
+    assert 'y2="466.6"' in encoded_line
+
+    assert 'stroke="blanchedalmond"' in encoded_line
+    assert 'stroke-width="1.234"' in encoded_line
+
+    svg_start = svg.index("<svg")
+    svg_end = svg.rindex("</svg>")
+
+    assert svg_start < line_start
+    assert line_end <= svg_end
+
+
+def test_render_line_with_style_override():
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Line(
+            start=Point(12.3, 45.6),
+            end=Point(78.9, 101.2),
+            style=Style(
+                stroke_color="darkorchid",
+            ),
+        )
+    )
+
+    renderer = SvgRenderer()
+
+    svg = renderer.render(doc)
+
+    line_start = svg.index("<line")
+    line_end = svg.index("/>", line_start)
+
+    encoded_line = svg[line_start : line_end + len("/>")]
+
+    assert encoded_line.startswith("<line")
+    assert encoded_line.endswith("/>")
+
+    assert 'stroke="darkorchid"' in encoded_line
+    assert 'stroke-width="1.234"' in encoded_line
+
+
+def test_render_line_with_stroke_width_override():
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Line(
+            start=Point(12.3, 45.6),
+            end=Point(78.9, 101.2),
+            style=Style(
+                stroke_width=9.876,
+            ),
+        )
+    )
+
+    renderer = SvgRenderer()
+
+    svg = renderer.render(doc)
+
+    line_start = svg.index("<line")
+    line_end = svg.index("/>", line_start)
+
+    encoded_line = svg[line_start : line_end + len("/>")]
+
+    assert encoded_line.startswith("<line")
+    assert encoded_line.endswith("/>")
+
+    assert 'stroke="blanchedalmond"' in encoded_line
+    assert 'stroke-width="9.876"' in encoded_line
