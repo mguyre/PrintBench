@@ -10,3 +10,4 @@ class Style:
     stroke_color: str | None = None
     stroke_width: float | None = None
     stroke_style: StrokeStyle | None = None
+    fill_color: str | None = None

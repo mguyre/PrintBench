@@ -2,8 +2,16 @@ from dataclasses import dataclass, field
 
 import svgwrite
 
-from printbench import Document, Line, Point
+from printbench import Circle, Document, Line, Point
 from printbench.style import StrokeStyle, Style
+
+_STROKE_PATTERNS = {
+    StrokeStyle.SOLID: None,
+    StrokeStyle.DASHED: "5,5",
+    StrokeStyle.CENTERLINE: "10,5,2,5",
+}
+
+_DEFAULT_FILL_COLOR = "none"
 
 
 @dataclass(slots=True)
@@ -27,7 +35,8 @@ class SvgRenderer:
             raise ValueError("Document.default_style cannot be None")
         self._document = document
         self._document_height = document.height
-        self._default_style = document.default_style
+        self._default_style = self._initialize_default_style(document.default_style)
+
         self._drawing = svgwrite.Drawing(
             size=(
                 f"{document.width}{document.units}",
@@ -41,13 +50,16 @@ class SvgRenderer:
             width=document.width,
             height=document.height,
         )
-        # TODO:
-        # Resolve document.default_style into a renderer-specific complete style.
 
     def _initialize_default_style(self, style: Style) -> Style:
         """Initialize the renderer default style."""
 
         return Style(
+            fill_color=(
+                style.fill_color
+                if style.fill_color is not None
+                else _DEFAULT_FILL_COLOR
+            ),
             stroke_color=(
                 style.stroke_color if style.stroke_color is not None else "black"
             ),
@@ -67,6 +79,11 @@ class SvgRenderer:
             return self._default_style
 
         return Style(
+            fill_color=(
+                style.fill_color
+                if style.fill_color is not None
+                else self._default_style.fill_color
+            ),
             stroke_color=(
                 style.stroke_color
                 if style.stroke_color is not None
@@ -84,11 +101,11 @@ class SvgRenderer:
             ),
         )
 
-    def _style_to_svg_attributes(
+    def _common_style_to_svg_attributes(
         self,
         style: Style,
     ) -> dict[str, object]:
-        """Convert a Style into svgwrite attributes."""
+        """Convert the style elements used by all sgv shapes into svgwrite attributes."""
 
         attributes: dict[str, object] = {}
 
@@ -104,27 +121,29 @@ class SvgRenderer:
 
         return attributes
 
+    def _closed_style_to_svg_attributes(
+        self,
+        style: Style,
+    ) -> dict[str, object]:
+        """Convert Style properties for a closed SVG shape."""
+
+        attributes = self._common_style_to_svg_attributes(style)
+        attributes["fill"] = style.fill_color
+
+        return attributes
+
     def _stroke_style_to_svg_attributes(
         self,
         stroke_style: StrokeStyle,
     ) -> dict[str, object]:
         """Convert a StrokeStyle into svgwrite attributes."""
 
-        match stroke_style:
-            case StrokeStyle.SOLID:
-                return {}
+        dasharray = _STROKE_PATTERNS[stroke_style]
 
-            case StrokeStyle.DASHED:
-                return {
-                    "stroke_dasharray": "5,5",
-                }
+        if dasharray is None:
+            return {}
 
-            case StrokeStyle.CENTERLINE:
-                return {
-                    "stroke_dasharray": "10,5,2,5",
-                }
-
-        raise ValueError(f"Unsupported stroke style: {stroke_style}")
+        return {"stroke_dasharray": dasharray}
 
     def _map_point(self, point: Point) -> Point:
         """Map a document point (Cartesian) into SVG coordinates."""
@@ -138,6 +157,8 @@ class SvgRenderer:
     def _render(self, element) -> None:
         if isinstance(element, Line):
             self._render_line(element)
+        elif isinstance(element, Circle):
+            self._render_circle(element)
         else:
             raise TypeError(f"Unsupported element type: {type(element).__name__}")
 
@@ -146,12 +167,24 @@ class SvgRenderer:
         end = self._map_point(line.end)
 
         style = self._effective_style(line.style)
-        attributes = self._style_to_svg_attributes(style)
+        attributes = self._common_style_to_svg_attributes(style)
 
         self._drawing.add(
             self._drawing.line(
                 start=(start.x, start.y),
                 end=(end.x, end.y),
+                **attributes,
+            )
+        )
+
+    def _render_circle(self, circle: Circle) -> None:
+        center_point = self._map_point(circle.center)
+        style = self._effective_style(circle.style)
+        attributes = self._closed_style_to_svg_attributes(style)
+        self._drawing.add(
+            self._drawing.circle(
+                center=(center_point.x, center_point.y),
+                r=circle.radius,
                 **attributes,
             )
         )

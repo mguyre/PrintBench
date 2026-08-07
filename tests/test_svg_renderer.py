@@ -1,4 +1,4 @@
-from printbench import Document, Line, Point, SvgRenderer
+from printbench import Circle, Document, Line, Point, SvgRenderer
 from printbench.style import StrokeStyle, Style
 
 
@@ -59,12 +59,33 @@ def test_renderer_maps_point_to_svg_coordinates():
     assert result == expected
 
 
+def test_initialize_sets_renderer_default_style():
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(),
+    )
+
+    renderer = SvgRenderer()
+    renderer._initialize(doc)
+
+    # should be the default svg_renderer values
+    assert renderer._default_style == Style(
+        fill_color="none",
+        stroke_color="black",
+        stroke_width=1.0,
+        stroke_style=None,
+    )
+
+
 def test_effective_style_uses_renderer_default():
     renderer = SvgRenderer()
 
     renderer._default_style = Style(
+        fill_color="none",
         stroke_color="black",
         stroke_width=1.0,
+        stroke_style=StrokeStyle.SOLID,
     )
 
     result = renderer._effective_style(None)
@@ -76,8 +97,10 @@ def test_effective_style_empty_style_uses_renderer_default():
     renderer = SvgRenderer()
 
     renderer._default_style = Style(
+        fill_color="none",
         stroke_color="black",
         stroke_width=1.0,
+        stroke_style=StrokeStyle.SOLID,
     )
 
     result = renderer._effective_style(Style())
@@ -279,3 +302,164 @@ def test_render_line_with_stroke_width_override():
 
     assert 'stroke="blanchedalmond"' in encoded_line
     assert 'stroke-width="9.876"' in encoded_line
+
+
+def test_render_dashed_line() -> None:
+    """Renderer emits a dashed SVG line."""
+
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    style = Style(
+        stroke_color="black",
+        stroke_style=StrokeStyle.DASHED,
+    )
+
+    doc.add(
+        Line(
+            Point(10, 20),
+            Point(30, 40),
+            style=style,
+        )
+    )
+
+    renderer = SvgRenderer()
+
+    svg = renderer.render(doc)
+
+    line_start = svg.index("<line")
+    line_end = svg.index("/>", line_start) + 2
+
+    encoded_line = svg[line_start:line_end]
+
+    assert 'stroke-dasharray="5,5"' in encoded_line
+
+
+def test_render_centerline() -> None:
+    """Renderer emits a centerline SVG line."""
+
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    style = Style(
+        stroke_color="black",
+        stroke_style=StrokeStyle.CENTERLINE,
+    )
+
+    doc.add(
+        Line(
+            Point(10, 20),
+            Point(30, 40),
+            style=style,
+        )
+    )
+
+    renderer = SvgRenderer()
+
+    svg = renderer.render(doc)
+    # print(svg)
+
+    line_start = svg.index("<line")
+    line_end = svg.index("/>", line_start) + 2
+
+    encoded_line = svg[line_start:line_end]
+
+    assert 'stroke-dasharray="10,5,2,5"' in encoded_line
+
+
+def test_closed_style_to_svg_attributes_includes_fill():
+    renderer = SvgRenderer()
+
+    style = Style(
+        fill_color="blanchedalmond",
+        stroke_color="cornflowerblue",
+        stroke_width=1.234,
+        stroke_style=StrokeStyle.DASHED,
+    )
+
+    attributes = renderer._closed_style_to_svg_attributes(style)
+
+    assert attributes["fill"] == "blanchedalmond"
+    assert attributes["stroke"] == "cornflowerblue"
+    assert attributes["stroke_width"] == 1.234
+    assert attributes["stroke_dasharray"] == "5,5"
+
+
+def test_render_circle() -> None:
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Circle(
+            center=Point(12.3, 45.6),
+            radius=78.9,
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+    print(svg)
+    circle_start = svg.index("<circle")
+    circle_end = svg.index("/>", circle_start) + len("/>")
+
+    encoded_circle = svg[circle_start:circle_end]
+
+    assert encoded_circle.startswith("<circle")
+    assert encoded_circle.endswith("/>")
+
+    assert 'cx="12.3"' in encoded_circle
+    assert 'cy="522.2"' in encoded_circle  # Cartesian to SVG: 567.8 - 45.6 = 522.2
+    assert 'r="78.9"' in encoded_circle
+
+    assert 'stroke="blanchedalmond"' in encoded_circle
+    assert 'stroke-width="1.234"' in encoded_circle
+    assert 'fill="none"' in encoded_circle
+
+
+def test_render_filled_circle() -> None:
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Circle(
+            center=Point(12.3, 45.6),
+            radius=78.9,
+            style=Style(
+                fill_color="cornflowerblue",
+            ),
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    circle_start = svg.index("<circle")
+    circle_end = svg.index("/>", circle_start) + 2
+
+    encoded_circle = svg[circle_start:circle_end]
+
+    assert 'fill="cornflowerblue"' in encoded_circle
