@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import svgwrite
 
-from printbench import Circle, Document, Line, Point
+from printbench import Circle, Document, Ellipse, Line, Point, Rectangle
 from printbench.style import StrokeStyle, Style
 
 _STROKE_PATTERNS = {
@@ -159,6 +159,10 @@ class SvgRenderer:
             self._render_line(element)
         elif isinstance(element, Circle):
             self._render_circle(element)
+        elif isinstance(element, Rectangle):
+            self._render_rectangle(element)
+        elif isinstance(element, Ellipse):
+            self._render_ellipse(element)
         else:
             raise TypeError(f"Unsupported element type: {type(element).__name__}")
 
@@ -185,6 +189,40 @@ class SvgRenderer:
             self._drawing.circle(
                 center=(center_point.x, center_point.y),
                 r=circle.radius,
+                **attributes,
+            )
+        )
+
+    def _render_rectangle(self, rectangle: Rectangle) -> None:
+        """Emit a rectangle using the top left corner, width and height values"""
+        top_left = Point(
+            rectangle.bottom_left.x,
+            rectangle.bottom_left.y + rectangle.height,
+        )
+        insert_point = self._map_point(top_left)
+
+        style = self._effective_style(rectangle.style)
+        attributes = self._closed_style_to_svg_attributes(style)
+
+        self._drawing.add(
+            self._drawing.rect(
+                insert=(insert_point.x, insert_point.y),
+                size=(rectangle.width, rectangle.height),
+                **attributes,
+            )
+        )
+
+    def _render_ellipse(self, ellipse: Ellipse) -> None:
+        """Emit an ellipse using the center point and x and y radi"""
+        center = self._map_point(ellipse.center)
+
+        style = self._effective_style(ellipse.style)
+        attributes = self._closed_style_to_svg_attributes(style)
+
+        self._drawing.add(
+            self._drawing.ellipse(
+                center=(center.x, center.y),
+                r=(ellipse.radius_x, ellipse.radius_y),
                 **attributes,
             )
         )

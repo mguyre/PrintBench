@@ -1,4 +1,4 @@
-from printbench import Circle, Document, Line, Point, SvgRenderer
+from printbench import Circle, Document, Ellipse, Line, Point, Rectangle, SvgRenderer
 from printbench.style import StrokeStyle, Style
 
 
@@ -416,7 +416,7 @@ def test_render_circle() -> None:
 
     renderer = SvgRenderer()
     svg = renderer.render(doc)
-    print(svg)
+    # print(svg)
     circle_start = svg.index("<circle")
     circle_end = svg.index("/>", circle_start) + len("/>")
 
@@ -463,3 +463,156 @@ def test_render_filled_circle() -> None:
     encoded_circle = svg[circle_start:circle_end]
 
     assert 'fill="cornflowerblue"' in encoded_circle
+
+
+def test_render_rectangle() -> None:
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Rectangle(
+            bottom_left=Point(12.3, 45.6),
+            width=78.9,
+            height=23.4,
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    rect_start = svg.index("<rect")
+    rect_end = svg.index("/>", rect_start) + 2
+
+    encoded_rect = svg[rect_start:rect_end]
+
+    assert encoded_rect.startswith("<rect")
+    assert encoded_rect.endswith("/>")
+
+    assert 'x="12.3"' in encoded_rect
+    assert 'y="498.8"' in encoded_rect
+
+    assert 'width="78.9"' in encoded_rect
+    assert 'height="23.4"' in encoded_rect
+
+    assert 'fill="none"' in encoded_rect
+    assert 'stroke="blanchedalmond"' in encoded_rect
+    assert 'stroke-width="1.234"' in encoded_rect
+
+
+def test_render_filled_rectangle() -> None:
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Rectangle(
+            bottom_left=Point(12.3, 45.6),
+            width=78.9,
+            height=23.4,
+            style=Style(
+                fill_color="cornflowerblue",
+            ),
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    rect_start = svg.index("<rect")
+    rect_end = svg.index("/>", rect_start) + 2
+
+    encoded_rect = svg[rect_start:rect_end]
+
+    assert 'fill="cornflowerblue"' in encoded_rect
+
+
+def test_render_ellipse() -> None:
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Ellipse(
+            center=Point(12.3, 45.6),
+            radius_x=78.9,
+            radius_y=23.4,
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    rect_start = svg.index("<ellipse")
+    rect_end = svg.index("/>", rect_start) + 2
+
+    encoded_ellipse = svg[rect_start:rect_end]
+
+    assert encoded_ellipse.startswith("<ellipse")
+    assert encoded_ellipse.endswith("/>")
+
+    assert 'cx="12.3"' in encoded_ellipse
+    assert 'cy="522.2"' in encoded_ellipse  # 567.8 - 45.6
+
+    assert 'rx="78.9"' in encoded_ellipse
+    assert 'ry="23.4"' in encoded_ellipse
+
+    assert 'fill="none"' in encoded_ellipse
+    assert 'stroke="blanchedalmond"' in encoded_ellipse
+    assert 'stroke-width="1.234"' in encoded_ellipse
+
+
+def test_render_filled_ellipse() -> None:
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    doc.add(
+        Ellipse(
+            center=Point(12.3, 45.6),
+            radius_x=78.9,
+            radius_y=23.4,
+            style=Style(fill_color="lemonchiffon"),
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    rect_start = svg.index("<ellipse")
+    rect_end = svg.index("/>", rect_start) + 2
+
+    encoded_ellipse = svg[rect_start:rect_end]
+
+    assert encoded_ellipse.startswith("<ellipse")
+    assert encoded_ellipse.endswith("/>")
+
+    assert 'cx="12.3"' in encoded_ellipse
+    assert 'cy="522.2"' in encoded_ellipse  # 567.8 - 45.6
+
+    assert 'rx="78.9"' in encoded_ellipse
+    assert 'ry="23.4"' in encoded_ellipse
+
+    assert 'fill="lemonchiffon"' in encoded_ellipse
+    assert 'stroke="blanchedalmond"' in encoded_ellipse
+    assert 'stroke-width="1.234"' in encoded_ellipse
