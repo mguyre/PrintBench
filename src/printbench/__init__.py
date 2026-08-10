@@ -14,6 +14,7 @@ from .geometry import (
     Polyline,
     Rectangle,
     Vector,
+    center_mark,
     circumscribed_regular_polygon,
     inscribed_regular_polygon,
 )
@@ -35,6 +36,7 @@ __all__ = [
     "Style",
     "SvgRenderer",
     "Vector",
+    "center_mark",
     "circumscribed_regular_polygon",
     "inscribed_regular_polygon",
 ]

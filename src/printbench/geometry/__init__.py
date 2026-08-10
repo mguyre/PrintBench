@@ -4,7 +4,7 @@ Geometry primitives used throughout PrintBench.
 
 from .circle import Circle
 from .ellipse import Ellipse
-from .line import Line
+from .line import Line, center_mark
 from .point import Point
 from .polygon import (
     Polygon,
@@ -24,6 +24,7 @@ __all__ = [
     "Polyline",
     "Rectangle",
     "Vector",
+    "center_mark",
     "circumscribed_regular_polygon",
     "inscribed_regular_polygon",
 ]

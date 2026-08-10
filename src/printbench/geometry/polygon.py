@@ -62,7 +62,8 @@ def circumscribed_regular_polygon(
     rotation: float = 0.0,
     style: Style | None = None,
 ) -> Polygon:
-    """Creates a closed polygon of n equal sides where the midpoints of the sides are tangent to the circle"""
+    """Creates a closed polygon of n equal sides where the midpoints of the sides are tangent
+    to the circle"""
     circumradius = inradius / math.cos(math.pi / sides)
 
     return inscribed_regular_polygon(

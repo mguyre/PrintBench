@@ -35,3 +35,42 @@ class Line:
 
     def midpoint(self) -> Point:
         return self.start + self.vector() / 2
+
+
+def center_mark(
+    center: Point,
+    size: float,
+    style: Style | None = None,
+) -> tuple[Line, Line]:
+    """Create horizontal and vertical lines centered on a point."""
+
+    if size <= 0:
+        raise ValueError("size must be greater than zero")
+
+    half_size = size / 2.0
+
+    horizontal = Line(
+        start=Point(
+            center.x - half_size,
+            center.y,
+        ),
+        end=Point(
+            center.x + half_size,
+            center.y,
+        ),
+        style=style,
+    )
+
+    vertical = Line(
+        start=Point(
+            center.x,
+            center.y - half_size,
+        ),
+        end=Point(
+            center.x,
+            center.y + half_size,
+        ),
+        style=style,
+    )
+
+    return horizontal, vertical
