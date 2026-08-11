@@ -4,11 +4,12 @@ from dataclasses import dataclass
 
 from printbench.style import Style
 
+from .closed_shape import ClosedShape
 from .point import Point
 
 
 @dataclass(frozen=True, slots=True)
-class Rectangle:
+class Rectangle(ClosedShape):
     """A rectangle defined by its bottom-left corner, width, and height."""
 
     bottom_left: Point

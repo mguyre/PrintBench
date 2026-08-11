@@ -1,3 +1,3 @@
-from .document import Document
+from .document import ClipContainer, Document
 
-__all__ = ["Document"]
+__all__ = ["ClipContainer", "Document"]

@@ -5,11 +5,12 @@ from dataclasses import dataclass
 
 from printbench.style import Style
 
+from .closed_shape import ClosedShape
 from .point import Point
 
 
 @dataclass(frozen=True, slots=True)
-class Polygon:
+class Polygon(ClosedShape):
     """a closed object made up of a list of connected points"""
 
     points: tuple[Point, ...]

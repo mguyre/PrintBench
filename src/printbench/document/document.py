@@ -22,6 +22,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import ClassVar
 
+from printbench.geometry import ClosedShape
 from printbench.style import Style
 
 
@@ -53,4 +54,28 @@ class Document:
         return len(self._elements)
 
     def __iter__(self) -> Iterator:
+        return iter(self._elements)
+
+
+@dataclass(slots=True)
+class ClipContainer:
+    """Contains entities clipped to a closed shape."""
+
+    shape: ClosedShape
+    _elements: list = field(default_factory=list)
+
+    def __init__(self, shape: ClosedShape) -> None:
+        if not isinstance(shape, ClosedShape):
+            raise TypeError("shape must be a ClosedShape")
+
+        self.shape = shape
+        self._elements = []
+
+    def add(self, entity) -> None:
+        self._elements.append(entity)
+
+    def __len__(self) -> int:
+        return len(self._elements)
+
+    def __iter__(self):
         return iter(self._elements)

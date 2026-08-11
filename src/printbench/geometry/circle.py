@@ -4,11 +4,12 @@ from dataclasses import dataclass
 
 from printbench.style import Style
 
+from .closed_shape import ClosedShape
 from .point import Point
 
 
 @dataclass(frozen=True, slots=True)
-class Circle:
+class Circle(ClosedShape):
     """A circle defined by a center point and radius."""
 
     center: Point

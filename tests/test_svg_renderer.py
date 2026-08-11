@@ -1,4 +1,8 @@
+import re
+import pytest
+
 from printbench import (
+    ClipContainer,
     Circle,
     Document,
     Ellipse,
@@ -198,6 +202,14 @@ def test_effective_style_overrides_all_values():
     assert result == override
 
 
+def svg_attribute(element: str, name: str) -> str:
+    match = re.search(rf'{name}="([^"]+)"', element)
+
+    assert match is not None
+
+    return match.group(1)
+
+
 def test_render_line():
     doc = Document(
         width=432.1,
@@ -226,14 +238,14 @@ def test_render_line():
     assert encoded_line.startswith("<line")
     assert encoded_line.endswith("/>")
 
-    assert 'x1="12.3"' in encoded_line
-    assert 'y1="522.2"' in encoded_line
+    assert float(svg_attribute(encoded_line, "x1")) == pytest.approx(12.3)
+    assert float(svg_attribute(encoded_line, "y1")) == pytest.approx(522.2)
 
-    assert 'x2="78.9"' in encoded_line
-    assert 'y2="466.6"' in encoded_line
+    assert float(svg_attribute(encoded_line, "x2")) == pytest.approx(78.9)
+    assert float(svg_attribute(encoded_line, "y2")) == pytest.approx(466.6)
 
-    assert 'stroke="blanchedalmond"' in encoded_line
-    assert 'stroke-width="1.234"' in encoded_line
+    assert svg_attribute(encoded_line, "stroke") == "blanchedalmond"
+    assert float(svg_attribute(encoded_line, "stroke-width")) == pytest.approx(1.234)
 
     svg_start = svg.index("<svg")
     svg_end = svg.rindex("</svg>")
@@ -710,3 +722,29 @@ def test_render_polygon() -> None:
     assert 'stroke="blanchedalmond"' in encoded_polygon
     assert 'stroke-width="1.234"' in encoded_polygon
     assert 'fill="none"' in encoded_polygon
+
+
+def test_render_clip_container_with_circle():
+    doc = Document(width=432.1, height=567.8)
+
+    clip_shape = Circle(
+        center=Point(123.4, 234.5),
+        radius=34.6,
+    )
+
+    line = Line(
+        start=Point(100.1, 200.2),
+        end=Point(150.3, 260.4),
+    )
+
+    clip = ClipContainer(clip_shape)
+    clip.add(line)
+    doc.add(clip)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+    print(svg)
+    assert "<clipPath" in svg
+    assert "<circle" in svg
+    assert 'clip-path="url(#' in svg
+    assert "<line" in svg

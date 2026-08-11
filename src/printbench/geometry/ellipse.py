@@ -4,11 +4,12 @@ from dataclasses import dataclass
 
 from printbench.style import Style
 
+from .closed_shape import ClosedShape
 from .point import Point
 
 
 @dataclass(frozen=True, slots=True)
-class Ellipse:
+class Ellipse(ClosedShape):
     """An ellipse defined by a center point and two radii."""
 
     center: Point

@@ -3,6 +3,7 @@ Geometry primitives used throughout PrintBench.
 """
 
 from .circle import Circle
+from .closed_shape import ClosedShape
 from .ellipse import Ellipse
 from .line import Line, center_mark
 from .point import Point
@@ -17,6 +18,7 @@ from .vector import Vector
 
 __all__ = [
     "Circle",
+    "ClosedShape",
     "Ellipse",
     "Line",
     "Point",

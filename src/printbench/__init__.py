@@ -4,9 +4,10 @@ PrintBench
 A framework for generating and analyzing print characterization targets.
 """
 
-from .document import Document
+from .document import ClipContainer, Document
 from .geometry import (
     Circle,
+    ClosedShape,
     Ellipse,
     Line,
     Point,
@@ -21,10 +22,12 @@ from .geometry import (
 from .renderers import SvgRenderer
 from .style import StrokeStyle, Style
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Circle",
+    "ClipContainer",
+    "ClosedShape",
     "Document",
     "Ellipse",
     "Line",
