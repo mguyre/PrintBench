@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 import svgwrite
 
 from printbench import (
-    ClipContainer,
     Circle,
+    ClipContainer,
     Document,
     Ellipse,
     Line,
@@ -31,6 +31,7 @@ class SvgRenderer:
     _document_height: float = 0.0  # Set by _initialize() before rendering.
     _default_style: Style = field(default_factory=Style)
     _drawing: svgwrite.Drawing | None = None
+    _clip_id: int | None = None
 
     def render(self, document: Document) -> str:
         self._initialize(document)
@@ -46,7 +47,7 @@ class SvgRenderer:
         self._document = document
         self._document_height = document.height
         self._default_style = self._initialize_default_style(document.default_style)
-
+        self._clip_id = 0
         self._drawing = svgwrite.Drawing(
             size=(
                 f"{document.width}{document.units}",
@@ -184,6 +185,9 @@ class SvgRenderer:
         else:
             raise TypeError(f"Unsupported element type: {type(element).__name__}")
 
+    def _svg_number(self, value: float) -> float:
+        return round(value, 4)
+
     def _render_line(self, line: Line, parent) -> None:
         start = self._map_point(line.start)
         end = self._map_point(line.end)
@@ -192,56 +196,77 @@ class SvgRenderer:
         attributes = self._common_style_to_svg_attributes(style)
 
         svg_line = self._drawing.line(
-            start=(start.x, start.y),
-            end=(end.x, end.y),
+            start=(self._svg_number(start.x), self._svg_number(start.y)),
+            end=(self._svg_number(end.x), self._svg_number(end.y)),
             **attributes,
         )
 
         parent.add(svg_line)
 
     def _render_circle(self, circle: Circle, parent) -> None:
-        center_point = self._map_point(circle.center)
+        svg_circle = self._circle_to_svg(circle)
+
         style = self._effective_style(circle.style)
         attributes = self._closed_style_to_svg_attributes(style)
 
-        svg_circle = self._drawing.circle(
-            center=(center_point.x, center_point.y),
-            r=circle.radius,
-            **attributes,
-        )
+        svg_circle.update(attributes)
         parent.add(svg_circle)
 
+    def _circle_to_svg(self, circle: Circle):
+        center = self._map_point(circle.center)
+
+        return self._drawing.circle(
+            center=(
+                self._svg_number(center.x),
+                self._svg_number(center.y),
+            ),
+            r=self._svg_number(circle.radius),
+        )
+
     def _render_rectangle(self, rectangle: Rectangle, parent) -> None:
-        """Emit a rectangle using the top left corner, width and height values"""
+        """Emit a rectangle using the top left corner, width and height values."""
+        svg_rect = self._rectangle_to_svg(rectangle)
+
+        style = self._effective_style(rectangle.style)
+        attributes = self._closed_style_to_svg_attributes(style)
+
+        svg_rect.update(attributes)
+
+        parent.add(svg_rect)
+
+    def _rectangle_to_svg(self, rectangle: Rectangle):
         top_left = Point(
             rectangle.bottom_left.x,
             rectangle.bottom_left.y + rectangle.height,
         )
         insert_point = self._map_point(top_left)
 
-        style = self._effective_style(rectangle.style)
-        attributes = self._closed_style_to_svg_attributes(style)
-
-        svg_rect = self._drawing.rect(
-            insert=(insert_point.x, insert_point.y),
-            size=(rectangle.width, rectangle.height),
-            **attributes,
+        return self._drawing.rect(
+            insert=(
+                self._svg_number(insert_point.x),
+                self._svg_number(insert_point.y),
+            ),
+            size=(
+                self._svg_number(rectangle.width),
+                self._svg_number(rectangle.height),
+            ),
         )
-        parent.add(svg_rect)
 
     def _render_ellipse(self, ellipse: Ellipse, parent) -> None:
         """Emit an ellipse using the center point and x and y radi"""
-        center = self._map_point(ellipse.center)
-
+        svg_ellipse = self._ellipse_to_svg(ellipse)
         style = self._effective_style(ellipse.style)
         attributes = self._closed_style_to_svg_attributes(style)
+        svg_ellipse.update(attributes)
 
-        svg_ellipse = self._drawing.ellipse(
-            center=(center.x, center.y),
-            r=(ellipse.radius_x, ellipse.radius_y),
-            **attributes,
-        )
         parent.add(svg_ellipse)
+
+    def _ellipse_to_svg(self, ellipse: Ellipse):
+        center = self._map_point(ellipse.center)
+        return self._drawing.ellipse(
+            center=(self._svg_number(center.x), self._svg_number(center.y)),
+            r=(self._svg_number(ellipse.radius_x), self._svg_number(ellipse.radius_y)),
+        )
 
     def _render_polyline(self, polyline: Polyline, parent) -> None:
         """Emit a polyline as a string of points"""
@@ -251,42 +276,44 @@ class SvgRenderer:
         attributes = self._common_style_to_svg_attributes(style)
 
         svg_polyline = self._drawing.polyline(
-            points=[(point.x, point.y) for point in points],
+            points=[
+                (self._svg_number(point.x), self._svg_number(point.y))
+                for point in points
+            ],
             **attributes,
         )
         parent.add(svg_polyline)
 
     def _render_polygon(self, polygon: Polygon, parent) -> None:
-        """Emit a closed polygon as a string of points"""
-        points = [self._map_point(point) for point in polygon.points]
+        svg_polygon = self._polygon_to_svg(polygon)
 
         style = self._effective_style(polygon.style)
         attributes = self._closed_style_to_svg_attributes(style)
 
-        svg_polygon = self._drawing.polygon(
-            points=[(point.x, point.y) for point in points],
-            **attributes,
-        )
+        svg_polygon.update(attributes)
         parent.add(svg_polygon)
 
+    def _polygon_to_svg(self, polygon: Polygon):
+        points = []
+
+        for point in polygon.points:
+            mapped = self._map_point(point)
+
+            points.append(
+                (
+                    self._svg_number(mapped.x),
+                    self._svg_number(mapped.y),
+                )
+            )
+
+        return self._drawing.polygon(points=points)
+
     def _render_clip_container(self, container: ClipContainer, parent) -> None:
-        shape = container.shape
-
-        if not isinstance(shape, Circle):
-            raise TypeError(f"Unsupported clipping shape: {type(shape).__name__}")
-
-        center = self._map_point(shape.center)
-
-        clip_id = "clip-1"
+        clip_id = self._next_clip_id()
 
         clip_path = self._drawing.clipPath(id=clip_id)
 
-        clip_path.add(
-            self._drawing.circle(
-                center=(center.x, center.y),
-                r=shape.radius,
-            )
-        )
+        clip_path.add(self._render_clip_shape(container.shape))
 
         self._drawing.defs.add(clip_path)
 
@@ -297,4 +324,23 @@ class SvgRenderer:
 
         parent.add(group)
 
-        self._render(shape, parent=parent)
+        self._render(container.shape, parent=parent)
+
+    def _render_clip_shape(self, shape):
+        if isinstance(shape, Circle):
+            return self._circle_to_svg(shape)
+
+        if isinstance(shape, Rectangle):
+            return self._rectangle_to_svg(shape)
+
+        if isinstance(shape, Ellipse):
+            return self._ellipse_to_svg(shape)
+
+        if isinstance(shape, Polygon):
+            return self._polygon_to_svg(shape)
+
+        raise TypeError(f"Unsupported clipping shape: {type(shape).__name__}")
+
+    def _next_clip_id(self) -> str:
+        self._clip_id += 1
+        return f"clip-{self._clip_id}"

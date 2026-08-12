@@ -1,9 +1,10 @@
 import re
+
 import pytest
 
 from printbench import (
-    ClipContainer,
     Circle,
+    ClipContainer,
     Document,
     Ellipse,
     Line,
@@ -230,6 +231,7 @@ def test_render_line():
     renderer = SvgRenderer()
 
     svg = renderer.render(doc)
+    # print(svg)
     line_start = svg.index("<line")
     line_end = svg.index("/>", line_start) + len("/>")
 
@@ -743,8 +745,175 @@ def test_render_clip_container_with_circle():
 
     renderer = SvgRenderer()
     svg = renderer.render(doc)
-    print(svg)
-    assert "<clipPath" in svg
-    assert "<circle" in svg
-    assert 'clip-path="url(#' in svg
-    assert "<line" in svg
+    # print(svg)
+
+    clip_start = svg.index("<clipPath")
+    clip_end = svg.index("</clipPath>") + len("</clipPath>")
+    encoded_clip = svg[clip_start:clip_end]
+
+    assert 'id="clip-1"' in encoded_clip
+    assert '<circle cx="123.4" cy="333.3" r="34.6"' in encoded_clip
+
+    group_start = svg.index("<g ")
+    group_end = svg.index("</g>", group_start) + len("</g>")
+    encoded_group = svg[group_start:group_end]
+
+    assert 'clip-path="url(#clip-1)"' in encoded_group
+    assert "<line " in encoded_group
+    assert "<circle" not in encoded_group
+
+    assert svg.count("<circle") == 2
+
+
+def test_render_multiple_clip_containers_have_unique_ids():
+    doc = Document(width=432.1, height=567.8)
+
+    clip1 = ClipContainer(
+        Circle(
+            center=Point(123.4, 234.5),
+            radius=34.6,
+        )
+    )
+
+    clip2 = ClipContainer(
+        Circle(
+            center=Point(321.4, 432.5),
+            radius=43.6,
+        )
+    )
+
+    doc.add(clip1)
+    doc.add(clip2)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    assert '<clipPath id="clip-1">' in svg
+    assert '<clipPath id="clip-2">' in svg
+
+    assert 'clip-path="url(#clip-1)"' in svg
+    assert 'clip-path="url(#clip-2)"' in svg
+
+
+def test_render_clip_container_contains_elements():
+    doc = Document(width=432.1, height=567.8)
+
+    clip = ClipContainer(
+        Circle(
+            center=Point(123.4, 234.5),
+            radius=34.6,
+        )
+    )
+
+    line = Line(
+        start=Point(100.1, 200.2),
+        end=Point(150.3, 260.4),
+    )
+    circle = Circle(
+        center=Point(12.3, 45.6),
+        radius=78.9,
+    )
+
+    clip.add(line)
+    clip.add(circle)
+    doc.add(clip)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+    # print(svg)
+
+    group_start = svg.index("<g ")
+    group_end = svg.index("</g>", group_start) + len("</g>")
+    encoded_group = svg[group_start:group_end]
+
+    assert 'clip-path="url(#clip-1)"' in encoded_group
+    assert "<line " in encoded_group
+    assert "<circle " in encoded_group
+
+    line_position = encoded_group.index("<line ")
+    circle_position = encoded_group.index("<circle ")
+
+    assert line_position < circle_position
+
+
+def test_render_clip_container_with_rectangle():
+    doc = Document(width=432.1, height=567.8)
+
+    clip_shape = Rectangle(
+        bottom_left=Point(12.3, 45.6),
+        width=78.9,
+        height=23.4,
+    )
+
+    clip = ClipContainer(clip_shape)
+    doc.add(clip)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    clip_start = svg.index("<clipPath")
+    clip_end = svg.index("</clipPath>") + len("</clipPath>")
+    encoded_clip = svg[clip_start:clip_end]
+
+    assert '<clipPath id="clip-1">' in encoded_clip
+    assert "<rect " in encoded_clip
+    assert 'x="12.3"' in encoded_clip
+    assert 'y="498.8"' in encoded_clip
+    assert 'width="78.9"' in encoded_clip
+    assert 'height="23.4"' in encoded_clip
+
+
+def test_render_clip_container_with_ellipse():
+    doc = Document(width=432.1, height=567.8)
+
+    clip_shape = Ellipse(
+        center=Point(12.3, 45.6),
+        radius_x=78.9,
+        radius_y=23.4,
+    )
+
+    clip = ClipContainer(clip_shape)
+    doc.add(clip)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    clip_start = svg.index("<clipPath")
+    clip_end = svg.index("</clipPath>") + len("</clipPath>")
+    encoded_clip = svg[clip_start:clip_end]
+
+    assert '<clipPath id="clip-1">' in encoded_clip
+    assert "<ellipse " in encoded_clip
+    assert 'cx="12.3"' in encoded_clip
+    assert 'cy="522.2"' in encoded_clip
+    assert 'rx="78.9"' in encoded_clip
+    assert 'ry="23.4"' in encoded_clip
+
+
+def test_render_clip_container_with_polygon():
+    doc = Document(width=432.1, height=567.8)
+
+    clip_shape = Polygon(
+        points=(
+            Point(12.3, 45.6),
+            Point(78.9, 123.4),
+            Point(234.5, 345.6),
+        )
+    )
+
+    clip = ClipContainer(clip_shape)
+    doc.add(clip)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    clip_start = svg.index("<clipPath")
+    clip_end = svg.index("</clipPath>") + len("</clipPath>")
+    encoded_clip = svg[clip_start:clip_end]
+
+    assert '<clipPath id="clip-1">' in encoded_clip
+    assert "<polygon " in encoded_clip
+
+    assert "12.3,522.2" in encoded_clip
+    assert "78.9,444.4" in encoded_clip
+    assert "234.5,222.2" in encoded_clip
