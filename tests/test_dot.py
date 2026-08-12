@@ -1,7 +1,7 @@
 import pytest
 
-from printbench.geometry import Dot, Point
 from printbench import Style
+from printbench.geometry import Dot, Point
 
 
 def test_dot_stores_center_and_diameter():

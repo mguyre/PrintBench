@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 import svgwrite
+import base64
 
 from printbench import (
     Circle,
@@ -12,6 +13,7 @@ from printbench import (
     Point,
     Polygon,
     Polyline,
+    Raster,
     Rectangle,
 )
 from printbench.style import StrokeStyle, Style
@@ -185,6 +187,8 @@ class SvgRenderer:
             self._render_rectangle(element, parent)
         elif isinstance(element, Ellipse):
             self._render_ellipse(element, parent)
+        elif isinstance(element, Raster):
+            self._render_raster(element, parent)
         else:
             raise TypeError(f"Unsupported element type: {type(element).__name__}")
 
@@ -372,3 +376,24 @@ class SvgRenderer:
     def _next_clip_id(self) -> str:
         self._clip_id += 1
         return f"clip-{self._clip_id}"
+
+    def _render_raster(self, raster: Raster, parent) -> None:
+        encoded_png = base64.b64encode(raster.png_data).decode("ascii")
+        data_uri = f"data:image/png;base64,{encoded_png}"
+
+        svg_x = raster.origin.x
+        svg_y = self._document.height - raster.origin.y - raster.height
+
+        parent.add(
+            self._drawing.image(
+                href=data_uri,
+                insert=(
+                    self._svg_number(svg_x),
+                    self._svg_number(svg_y),
+                ),
+                size=(
+                    self._svg_number(raster.width),
+                    self._svg_number(raster.height),
+                ),
+            )
+        )

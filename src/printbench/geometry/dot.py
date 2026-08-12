@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from .point import Point
+
 from printbench.style import Style
 
-
-from .vector import Vector
+from .point import Point
 
 
 @dataclass(frozen=True, slots=True)

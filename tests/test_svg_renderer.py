@@ -12,6 +12,7 @@ from printbench import (
     Point,
     Polygon,
     Polyline,
+    Raster,
     Rectangle,
     SvgRenderer,
 )
@@ -1028,3 +1029,34 @@ def test_render_clip_container_with_polygon():
     assert "12.3,522.2" in encoded_clip
     assert "78.9,444.4" in encoded_clip
     assert "234.5,222.2" in encoded_clip
+
+
+def test_render_raster():
+    doc = Document(width=432.1, height=567.8)
+
+    raster = Raster(
+        origin=Point(12.3, 45.6),
+        width=7.89,
+        height=6.54,
+        png_data=b"pretend png data",
+    )
+    doc.add(raster)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    image_start = svg.index("<image")
+    image_end = svg.index("/>", image_start) + 2
+
+    encoded_raster = svg[image_start:image_end]
+
+    assert encoded_raster.startswith("<image")
+    assert encoded_raster.endswith("/>")
+
+    assert 'x="12.3"' in encoded_raster
+    assert 'y="515.66"' in encoded_raster
+
+    assert 'width="7.89"' in encoded_raster
+    assert 'height="6.54"' in encoded_raster
+
+    assert 'href="data:image/png;base64,' in encoded_raster

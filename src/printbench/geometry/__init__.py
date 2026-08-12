@@ -14,6 +14,7 @@ from .polygon import (
     inscribed_regular_polygon,
 )
 from .polyline import Polyline
+from .raster import Raster
 from .rectangle import Rectangle
 from .vector import Vector
 
@@ -26,6 +27,7 @@ __all__ = [
     "Point",
     "Polygon",
     "Polyline",
+    "Raster",
     "Rectangle",
     "Vector",
     "center_mark",
