@@ -326,6 +326,44 @@ def test_render_line_with_stroke_width_override():
 
     assert 'stroke="blanchedalmond"' in encoded_line
     assert 'stroke-width="9.876"' in encoded_line
+    assert "stroke-dasharray" not in encoded_line
+
+
+def test_render_solid_line() -> None:
+    """Renderer emits a solid SVG line."""
+
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(
+            stroke_color="blanchedalmond",
+            stroke_width=1.234,
+        ),
+    )
+
+    style = Style(
+        stroke_color="black",
+        stroke_style=StrokeStyle.SOLID,
+    )
+
+    doc.add(
+        Line(
+            Point(10, 20),
+            Point(30, 40),
+            style=style,
+        )
+    )
+
+    renderer = SvgRenderer()
+
+    svg = renderer.render(doc)
+
+    line_start = svg.index("<line")
+    line_end = svg.index("/>", line_start) + 2
+
+    encoded_line = svg[line_start:line_end]
+
+    assert "stroke-dasharray" not in encoded_line
 
 
 def test_render_dashed_line() -> None:
