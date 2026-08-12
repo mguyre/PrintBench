@@ -8,6 +8,7 @@ from .document import ClipContainer, Document
 from .geometry import (
     Circle,
     ClosedShape,
+    Dot,
     Ellipse,
     Line,
     Point,
@@ -29,6 +30,7 @@ __all__ = [
     "ClipContainer",
     "ClosedShape",
     "Document",
+    "Dot",
     "Ellipse",
     "Line",
     "Point",

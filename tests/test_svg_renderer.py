@@ -6,6 +6,7 @@ from printbench import (
     Circle,
     ClipContainer,
     Document,
+    Dot,
     Ellipse,
     Line,
     Point,
@@ -762,6 +763,78 @@ def test_render_polygon() -> None:
     assert 'stroke="blanchedalmond"' in encoded_polygon
     assert 'stroke-width="1.234"' in encoded_polygon
     assert 'fill="none"' in encoded_polygon
+
+
+def test_render_dot() -> None:
+    doc = Document(width=432.1, height=567.8)
+    dot = Dot(
+        center=Point(12.3, 45.6),
+        diameter=2.468,
+    )
+    doc.add(dot)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+    # print(svg)
+    circle_start = svg.index("<circle")
+    circle_end = svg.index("/>", circle_start) + 2
+
+    encoded_dot = svg[circle_start:circle_end]
+
+    assert encoded_dot.startswith("<circle")
+    assert encoded_dot.endswith("/>")
+
+    assert 'cx="12.3"' in encoded_dot
+    assert 'cy="522.2"' in encoded_dot
+    assert 'r="1.234"' in encoded_dot
+
+    assert 'fill="black"' in encoded_dot
+    assert 'stroke="none"' in encoded_dot
+
+
+def test_render_dot_with_document_fill_color():
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(fill_color="blanchedalmond"),
+    )
+    dot = Dot(
+        center=Point(12.3, 45.6),
+        diameter=2.468,
+    )
+    doc.add(dot)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    circle_start = svg.index("<circle")
+    circle_end = svg.index("/>", circle_start) + 2
+    encoded_dot = svg[circle_start:circle_end]
+
+    assert 'fill="blanchedalmond"' in encoded_dot
+
+
+def test_render_dot_with_fill_color_override():
+    doc = Document(
+        width=432.1,
+        height=567.8,
+        default_style=Style(fill_color="blanchedalmond"),
+    )
+    dot = Dot(
+        center=Point(12.3, 45.6),
+        diameter=2.468,
+        style=Style(fill_color="magenta"),
+    )
+    doc.add(dot)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    circle_start = svg.index("<circle")
+    circle_end = svg.index("/>", circle_start) + 2
+    encoded_dot = svg[circle_start:circle_end]
+
+    assert 'fill="magenta"' in encoded_dot
 
 
 def test_render_clip_container_with_circle():

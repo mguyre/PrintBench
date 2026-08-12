@@ -6,6 +6,7 @@ from printbench import (
     Circle,
     ClipContainer,
     Document,
+    Dot,
     Ellipse,
     Line,
     Point,
@@ -170,6 +171,8 @@ class SvgRenderer:
             parent = self._drawing
         if isinstance(element, Line):
             self._render_line(element, parent)
+        elif isinstance(element, Dot):
+            self._render_dot(element, parent)
         elif isinstance(element, ClipContainer):
             self._render_clip_container(element, parent)
         elif isinstance(element, Circle):
@@ -307,6 +310,31 @@ class SvgRenderer:
             )
 
         return self._drawing.polygon(points=points)
+
+    def _render_dot(self, dot: Dot, parent) -> None:
+        center = self._map_point(dot.center)
+
+        if dot.style is not None and dot.style.fill_color is not None:
+            dot_color = dot.style.fill_color
+        elif (
+            self._default_style.fill_color is not None
+            and self._default_style.fill_color != "none"
+        ):
+            dot_color = self._default_style.fill_color
+        else:
+            dot_color = "black"
+
+        svg_dot = self._drawing.circle(
+            center=(
+                self._svg_number(center.x),
+                self._svg_number(center.y),
+            ),
+            r=self._svg_number(dot.diameter / 2.0),
+        )
+
+        svg_dot["fill"] = dot_color
+        svg_dot["stroke"] = "none"
+        parent.add(svg_dot)
 
     def _render_clip_container(self, container: ClipContainer, parent) -> None:
         clip_id = self._next_clip_id()
