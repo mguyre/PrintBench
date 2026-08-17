@@ -16,7 +16,7 @@ def test_hairlines_creates_three_clipping_boxes():
         color="cyan",
     )
 
-    targets = list(group)
+    targets = [element for element in group if isinstance(element, ClipContainer)]
 
     assert len(targets) == 3
     assert all(isinstance(target, ClipContainer) for target in targets)
@@ -31,7 +31,7 @@ def test_hairlines_creates_three_clipping_boxes():
 
 
 def test_hairlines_creates_lines_at_expected_angles():
-    targets = hairlines(
+    group = hairlines(
         bottom_left=Point(12.3, 45.6),
         box_width=43.2,
         box_height=21.4,
@@ -39,6 +39,7 @@ def test_hairlines_creates_lines_at_expected_angles():
         color="cyan",
     )
 
+    targets = [element for element in group if isinstance(element, ClipContainer)]
     expected_angles = [5.0, 10.0, 15.0]
 
     for target, expected_angle in zip(targets, expected_angles):
@@ -66,13 +67,15 @@ def test_hairlines_start_at_bottom_left_of_each_box():
         color="cyan",
     )
 
+    targets = [element for element in group if isinstance(element, ClipContainer)]
+
     expected_starts = [
         Point(12.3, 45.6),
         Point(63.3, 45.6),
         Point(114.3, 45.6),
     ]
 
-    for target, expected_start in zip(group, expected_starts):
+    for target, expected_start in zip(targets, expected_starts):
         line = list(target)[0]
         assert line.start == expected_start
 

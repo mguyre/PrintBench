@@ -1,7 +1,7 @@
 import math
 
 from printbench.document import ClipContainer, Group
-from printbench.geometry import Line, Point, Rectangle
+from printbench.geometry import Line, Point, Rectangle, Text
 from printbench.style import Style
 
 
@@ -11,12 +11,23 @@ def hairlines(
     box_height: float,
     box_spacing: float,
     color: str = "black",
+    label_font_size: float = 4.0,
 ) -> Group:
-    targets = Group()
+    group = Group()
     angles = (5.0, 10.0, 15.0)
 
     for index, angle in enumerate(angles):
         x = bottom_left.x + index * (box_width + box_spacing)
+
+        label = Text(
+            bottom_left=Point(
+                x,
+                bottom_left.y + box_height,
+            ),
+            text=f"{angle:g}°",
+            font_size=label_font_size,
+            style=Style(fill_color=color),
+        )
 
         shape = Rectangle(
             bottom_left=Point(x, bottom_left.y),
@@ -30,6 +41,7 @@ def hairlines(
             x,
             bottom_left.y,
         )
+
         line_length = box_width * 2.0
         angle_radians = math.radians(angle)
 
@@ -46,6 +58,7 @@ def hairlines(
             )
         )
 
-        targets.add(target)
+        group.add(label)
+        group.add(target)
 
-    return targets
+    return group
