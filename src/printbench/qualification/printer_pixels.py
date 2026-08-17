@@ -4,6 +4,16 @@ from PIL import Image
 
 from printbench.geometry import Point, Raster
 
+###
+# binary pattern
+#     ↓
+# RGBA pixels
+#     ↓
+# PNG encoding
+#     ↓
+# Raster.png_data
+#     
+###
 
 def _printer_pixel_pattern(
     width: int,
