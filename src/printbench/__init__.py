@@ -4,7 +4,7 @@ PrintBench
 A framework for generating and analyzing print characterization targets.
 """
 
-from .document import ClipContainer, Document
+from .document import ClipContainer, Document, Group
 from .geometry import (
     Circle,
     ClosedShape,
@@ -16,6 +16,7 @@ from .geometry import (
     Polyline,
     Raster,
     Rectangle,
+    Text,
     Vector,
     center_mark,
     circumscribed_regular_polygon,
@@ -33,6 +34,7 @@ __all__ = [
     "Document",
     "Dot",
     "Ellipse",
+    "Group",
     "Line",
     "Point",
     "Polygon",
@@ -42,6 +44,7 @@ __all__ = [
     "StrokeStyle",
     "Style",
     "SvgRenderer",
+    "Text",
     "Vector",
     "center_mark",
     "circumscribed_regular_polygon",

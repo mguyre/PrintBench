@@ -79,3 +79,22 @@ class ClipContainer:
 
     def __iter__(self):
         return iter(self._elements)
+
+
+@dataclass(slots=True)
+class Group:
+    """Contains related entities."""
+
+    _elements: list = field(default_factory=list)
+
+    def __init__(self) -> None:
+        self._elements = []
+
+    def add(self, entity) -> None:
+        self._elements.append(entity)
+
+    def __len__(self) -> int:
+        return len(self._elements)
+
+    def __iter__(self):
+        return iter(self._elements)

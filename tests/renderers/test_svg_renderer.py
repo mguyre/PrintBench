@@ -8,6 +8,7 @@ from printbench import (
     Document,
     Dot,
     Ellipse,
+    Group,
     Line,
     Point,
     Polygon,
@@ -15,6 +16,7 @@ from printbench import (
     Raster,
     Rectangle,
     SvgRenderer,
+    Text,
 )
 from printbench.style import StrokeStyle, Style
 
@@ -1060,3 +1062,72 @@ def test_render_raster():
     assert 'height="6.54"' in encoded_raster
 
     assert 'href="data:image/png;base64,' in encoded_raster
+
+
+def test_render_group_preserves_element_order():
+    doc = Document(
+        width=200.0,
+        height=100.0,
+    )
+
+    group = Group()
+
+    group.add(
+        Line(
+            start=Point(12.3, 45.6),
+            end=Point(78.9, 56.7),
+        )
+    )
+
+    group.add(
+        Rectangle(
+            bottom_left=Point(23.4, 34.5),
+            width=45.6,
+            height=12.3,
+        )
+    )
+
+    doc.add(group)
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    line_position = svg.find("<line")
+    rectangle_position = svg.find("<rect")
+
+    assert line_position != -1
+    assert rectangle_position != -1
+    assert line_position < rectangle_position
+
+
+def test_render_text():
+    doc = Document(
+        width=200.0,
+        height=100.0,
+    )
+
+    doc.add(
+        Text(
+            bottom_left=Point(12.3, 45.6),
+            text="15°",
+            font_size=4.7,
+            style=Style(fill_color="cyan"),
+        )
+    )
+
+    renderer = SvgRenderer()
+    svg = renderer.render(doc)
+
+    text_start = svg.index("<text")
+    text_end = svg.index("</text>", text_start) + len("</text>")
+
+    encoded_text = svg[text_start:text_end]
+
+    assert encoded_text.startswith("<text")
+    assert encoded_text.endswith("</text>")
+
+    assert ">15°" in encoded_text
+    assert 'x="12.3"' in encoded_text
+    assert 'y="54.4"' in encoded_text
+    assert 'font-size="4.7"' in encoded_text
+    assert 'fill="cyan"' in encoded_text

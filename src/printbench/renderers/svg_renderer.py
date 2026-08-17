@@ -1,7 +1,7 @@
+import base64
 from dataclasses import dataclass, field
 
 import svgwrite
-import base64
 
 from printbench import (
     Circle,
@@ -9,12 +9,14 @@ from printbench import (
     Document,
     Dot,
     Ellipse,
+    Group,
     Line,
     Point,
     Polygon,
     Polyline,
     Raster,
     Rectangle,
+    Text,
 )
 from printbench.style import StrokeStyle, Style
 
@@ -189,6 +191,10 @@ class SvgRenderer:
             self._render_ellipse(element, parent)
         elif isinstance(element, Raster):
             self._render_raster(element, parent)
+        elif isinstance(element, Group):
+            self._render_group(element, parent)
+        elif isinstance(element, Text):
+            self._render_text(element, parent)
         else:
             raise TypeError(f"Unsupported element type: {type(element).__name__}")
 
@@ -315,6 +321,21 @@ class SvgRenderer:
 
         return self._drawing.polygon(points=points)
 
+    def _render_text(self, text: Text, parent) -> None:
+        style = self._effective_style(text.style)
+
+        parent.add(
+            self._drawing.text(
+                text.text,
+                insert=(
+                    self._svg_number(text.bottom_left.x),
+                    self._svg_number(self._map_point(text.bottom_left).y),
+                ),
+                font_size=self._svg_number(text.font_size),
+                fill=style.fill_color,
+            )
+        )
+
     def _render_dot(self, dot: Dot, parent) -> None:
         center = self._map_point(dot.center)
 
@@ -397,3 +418,7 @@ class SvgRenderer:
                 ),
             )
         )
+
+    def _render_group(self, group: Group, parent) -> None:
+        for element in group:
+            self._render(element, parent)

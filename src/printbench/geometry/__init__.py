@@ -16,6 +16,7 @@ from .polygon import (
 from .polyline import Polyline
 from .raster import Raster
 from .rectangle import Rectangle
+from .text import Text
 from .vector import Vector
 
 __all__ = [
@@ -29,6 +30,7 @@ __all__ = [
     "Polyline",
     "Raster",
     "Rectangle",
+    "Text",
     "Vector",
     "center_mark",
     "circumscribed_regular_polygon",

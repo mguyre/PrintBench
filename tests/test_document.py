@@ -1,6 +1,15 @@
 import pytest
 
-from printbench import Circle, ClipContainer, Document, Line, Point, Style
+from printbench import (
+    Circle,
+    ClipContainer,
+    Document,
+    Group,
+    Line,
+    Point,
+    Rectangle,
+    Style,
+)
 
 
 @pytest.mark.parametrize(
@@ -147,3 +156,23 @@ def test_clip_container_adds_entities():
 
     assert len(clip) == 2
     assert list(clip) == [line, circle]
+
+
+def test_group_stores_elements_in_insertion_order():
+    group = Group()
+
+    first = Line(
+        start=Point(1.2, 3.4),
+        end=Point(5.6, 7.8),
+    )
+    second = Rectangle(
+        bottom_left=Point(9.1, 2.3),
+        width=4.5,
+        height=6.7,
+    )
+
+    group.add(first)
+    group.add(second)
+
+    assert len(group) == 2
+    assert list(group) == [first, second]

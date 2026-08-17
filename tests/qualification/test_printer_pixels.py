@@ -1,16 +1,14 @@
+from io import BytesIO
+
+import pytest
+from PIL import Image
+
+from printbench.geometry import Point, Raster
 from printbench.qualification.printer_pixels import (
     _pattern_to_rgba,
     _printer_pixel_pattern,
     printer_pixel_raster,
 )
-
-from io import BytesIO
-
-from PIL import Image
-
-import pytest
-
-from printbench.geometry import Point, Raster
 
 
 def test_printer_pixel_pattern_one_pixel_marks():

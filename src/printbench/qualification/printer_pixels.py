@@ -12,8 +12,9 @@ from printbench.geometry import Point, Raster
 # PNG encoding
 #     ↓
 # Raster.png_data
-#     
+#
 ###
+
 
 def _printer_pixel_pattern(
     width: int,
